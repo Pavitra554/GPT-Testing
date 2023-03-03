@@ -1,86 +1,80 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
+import React, { useState } from "react";
+import type { NextPage } from "next";
+import Head from "next/head";
+import Output from "../components/Output";
+import Link from "next/link";
 
 const Home: NextPage = () => {
+  const [data, setData] = useState("");
+  const [input, setInput] = useState("");
+  const [error, setError] = useState(false);
+  const [isloading, setIsLoading] = useState(false);
+
+  const generateData = async () => {
+    try {
+      if (input === "") {
+        throw error;
+      }
+      setIsLoading(true);
+      setInput("");
+
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ input }),
+      });
+
+      const incoming_DATA = await res.json();
+
+      setData(incoming_DATA.output.text);
+      setIsLoading(false);
+    } catch (e) {
+      setError(true);
+      console.log(e);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+    <div className='p-4'>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Savage GPT</title>
+        <link rel='icon' href='/favicon.ico' />
       </Head>
 
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
+      <div className='h-full flex flex-col justify-between max-w-xl mx-auto gap-4'>
+        <div className='flex flex-col w-full items-center gap-4'>
+          <div
+            className='text-zinc-100 font-bold
+         text-4xl'
           >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+            Savage GPT
+          </div>
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder='Enter your Question.. :)'
+            className='w-full h-40 bg-zinc-800/50 rounded-lg shadow-xl border border-zinc-700/80 focus:border-indigo-600 outline-none ease-linear duration-150 p-4 text-zinc-100 text-lg'
+          />
+          <div className='w-full flex flex-row-reverse'>
+            <button
+              onClick={() => generateData()}
+              className='flex justify-center items-center px-3 py-2 bg-indigo-600/10 border-2 border-indigo-600 text-indigo-600 rounded-lg hover:scale-105 active:scale-95 hover:bg-indigo-600 hover:text-zinc-100 ease-linear duration-150 select-none'
+            >
+              {isloading ? "Generating..." : "Generate Output"}
+            </button>
+          </div>
+          {data && <Output data={data && data.substring(6)} />}
         </div>
-      </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
+      </div>
+      <div className="w-full flex fixed bottom-4 flex-row items-center justify-center text-zinc-400 font-medium text-lg">
+        <Link href={'https://pavitra.vercel.app/'}>
+          <div>Built by <span className="italic text-indigo-600">@Pavitra</span></div>
+        </Link>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
